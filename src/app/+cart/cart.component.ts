@@ -14,34 +14,53 @@ export class CartComponent implements OnInit {
   utility: UtilityService;
   error: string;
   added: Array<any>;
+  cart: Array<any>;
 
   constructor(authService: AuthService, utility: UtilityService) {
       this.authService = authService;
       this.utility = utility;
+      this.cart = utility.getCart();
   }
 
   ngOnInit() {}
 
   createFakeBooking() {
-      let flight = {
-          "username": this.authService.getUser(),
-          "flights": [ {
-              "name": "Fake Flight",
-              "date": "6/23/2016",
-              "sourceairport": "CDG",
-              "destinationairport": "SFO"
-          } ]
+      let fake = {
+          "name": "Fake Flight",
+          "date": "6/23/2016 11:11:11",
+          "sourceairport": "CDG",
+          "destinationairport": "SFO"
       };
-      return this.utility.makePostRequest(environment.devHost + "/api/user/flights", [], flight, true).then((response: Response) => {
+      this.cart = this.utility.getCart();
+      this.cart.push(fake);
+      localStorage.setItem("cart", JSON.stringify(this.cart));
+  }
+
+  book(flight: any) {
+      let flights = {
+        "flights": [ flight ]
+      };
+      return this.utility.makePostRequest(environment.devHost + "/api/user/flights", [], flights, true).then((response: Response) => {
           let data = UtilityService.extractData(response);
           let narration = UtilityService.extractNarration(response);
           console.log(narration);
+          remove(flight);
           this.added = data.added;
           this.error = null;
       }, (error) => {
           this.added = null;
           this.error = error;
       });
+  }
+
+  remove(flight: any) {
+      this.cart.splice(this.cart.indexOf(flight), 1);
+      localStorage.setItem("cart", JSON.stringify(this.cart));
+  }
+
+  clearCart() {
+      this.cart = [];
+      localStorage.setItem("cart", JSON.stringify(this.cart));
   }
 
 }

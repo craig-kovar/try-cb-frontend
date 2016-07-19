@@ -1,8 +1,35 @@
-<p>
-  cart works!
-
-  <a class="button" (click)="createFakeBooking()">Click here to simulate a booking</a>
-
-</p>
+<div>
+    <button type="button" class="btn btn-xs btn-danger" (click)="clearCart()">
+        <i class="glyphicon glyphicon-remove-circle"></i> Clear Cart</button>
+</div>
+<div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Airline</th>
+                <th>Flight</th>
+                <th>Departure</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Price</th>
+                <th>Reservation</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let row of cart">
+                <td>{{row.name}}</td>
+                <td>{{row.flight}}</td>
+                <td>{{row.date}}</td>
+                <td>{{row.sourceairport | uppercase}}</td>
+                <td>{{row.destinationairport | uppercase}}</td>
+                <td>{{row.price}}$</td>
+                <td>
+                    <button class="btn btn-xs btn-primary" type="button" (click)="book(row)">Book</button>
+                    <button class="btn btn-xs btn-primary btn-danger" type="button" (click)="remove(row)" title="remove"><i class="glyphicon glyphicon-remove-circle"></i></button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 <div *ngIf="error" class="bg-danger text-danger">Error: {{error | json}}</div>
 <div *ngIf="added" class="bg-success">Added: {{added | json }}</div>
