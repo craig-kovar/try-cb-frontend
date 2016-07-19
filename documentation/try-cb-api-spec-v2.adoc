@@ -1,0 +1,680 @@
+= Try-Cb Sample App v2 REST API specification
+:toc: left
+:sectnums:
+
+== Overall Design
+The v2 of the API is designed around the following guidelines:
+
+ - the return type is `application/json` (unless otherwise noted).
+ - in case of success, the response body structure is the `Result` structure described below. The `data` entry contains JSON data to be directly displayed to the user. The `context` array contains values like N1QL queries that can be displayed in a console-like panel in the frontend ("narration").
+ - in case of application errors, the response body structure is the `Error` structure described below. It only contains a `failure` entry, a message that can be displayed to the user.
+
+=== Data Models
+
+.Result JSON structure
+[source,json]
+----
+{
+    "data": "any JSON object/array/value",
+    "context": [ "an array of strings", "can be omitted" ]
+}
+----
+
+.Error JSON structure
+[source,json]
+----
+{
+    "failure": "a single string message displayable to the user"
+}
+----
+
+.Flight (when booking)
+[source,json]
+----
+{
+    "name": "Fake Flight",
+    "fligh": "AF885",
+    "date": "6/23/2016 16:20:00",
+    "price": 200,
+    "sourceairport": "CDG",
+    "destinationairport": "SFO",
+    "bookedon": null
+}
+----
+Note: the `bookedon` field should be set by the backend, eg `try-cb-java` for Java. `date` time part is in utc. The `price` is considered to be expressed in dollars.
+
+=== What to store in Couchbase
+
+.User object stored in Couchbase
+[source,json]
+----
+{
+    "name": "username",
+    "password": "password hash",
+    "flights": [
+        {
+            "name": "Fake Flight",
+            "fligh": "AF885",
+            "date": "6/23/2016 16:20:00",
+            "price": 200,
+            "sourceairport": "CDG",
+            "destinationairport": "SFO",
+            "bookedon": "try-cb-xxx"
+        }
+    ]
+}
+----
+
+The flights is only initialized once user starts making bookings.
+
+=== What is stored in Browser's LocalStorage
+
+ 1. A `user` entry with the connected user's name.
+ 2. A `token` entry with the token (usually a JWT token, but can be a simpler base64 encoded user name if JWT is disabled).
+ 3. A `cart` entry with an array of flights (collected and ready for later booking).
+
+== Airport API
+
+=== findAll
+
+[source,javascript]
+----
+GET /api/airports?search=xxx
+----
+
+==== Parameters
+Url parameters.
+
+|===
+|Param |Description
+
+|`search`
+|The search parameter drives the airport search according to the value length and case.
+
+If `search` length = 3: `faa` code (search in uppercase) <1>
+
+If `search` length = 4 and fully uppercase / fully lowercase: `icao` code (search in uppercase) <2>
+
+Otherwise: `airportname` search using LIKE. <3>
+
+See each corresponding query below.
+|===
+
+==== Execution
+
+.(1)
+[source,sql]
+----
+SELECT airportname from `travel-sample` WHERE faa = 'XXX';
+----
+
+.(2)
+[source,sql]
+----
+SELECT airportname from `travel-sample` WHERE icao = 'YYYY';
+----
+
+.(3)
+[source,sql]
+----
+SELECT airportname from `travel-sample` WHERE airportname LIKE '%ZZZZZ';
+----
+
+==== Return Codes and Values
+`200`: Successfully searched airports (`application/json`)
+
+.200 body
+[source,json]
+----
+{
+    "data": [
+        { "airportname": "Some Airport Name" },
+        { "airportname": "Another Matching Airport" }
+    ],
+    "context": [
+        "THE N1QL QUERY THAT WAS EXECUTED"
+    ]
+}
+----
+
+`500`: Something went wrong.
+
+.500 body
+[source,json]
+----
+{
+    "failure": "message from the service/exception"
+}
+----
+
+
+
+== FlightPath API
+=== findAll
+
+[source,javascript]
+----
+GET /api/flightPaths/{from}/{to}?leave=mm/dd/YYYY
+----
+
+==== Parameters
+Path Variables & Url Parameters
+
+|===
+|Param |Description
+
+|`from`
+|Path variable. The *airport name* for the beginning of the route.
+
+|`to`
+|Path variable. The *airport name* for the end of the route.
+
+|`leave`
+|A `dd/mm/YYYY` formatted date for the trip, as an url query parameter.
+|===
+
+==== Execution
+`{from}`, `{to}`, `{fromAirport}` and `{toAirport}` are to be replaced by their corresponding values from the query parameters / code:
+
+The first query extracts airport faa codes to use in a second query:
+
+.Extract faa codes
+[source,sql]
+----
+#Retrieve and extract the fromAirport and toAirport faa codes
+SELECT faa AS fromAirport
+FROM `travel-sample`
+WHERE airportname = '{from}'
+UNION
+SELECT faa AS toAirport
+FROM `travel-sample`
+WHERE airportname = '{to}';
+----
+
+These faa codes are then used to find a route. Note that the `leave` date is only used to get a day of the week `dayOfWeek`, an int between `1` (Sunday) and `7` (Saturday).
+
+.Use faa codes to find routes
+[source,sql]
+----
+SELECT a.name, s.flight, s.utc, r.sourceairport, r.destinationairport, r.equipment
+FROM `travel-sample` AS r
+UNNEST r.schedule AS s
+JOIN `travel-sample` AS a ON KEYS r.airlineid
+WHERE r.sourceairport = '{fromAirport}'
+AND r.destinationairport = '{toAirport}'
+AND s.day = {dayOfWeek}
+ORDER BY a.name ASC;
+----
+
+The returned `data` payload corresponds to the rows of the second query (name, flight, utc, sourceairport, destinationairport, equipment) with an additional `price` column.
+
+The `price` can be generated randomly, or with a more consistent algorithm.
+
+WARNING: The NodeJS backend estimates the flight time and computes the `price` accordingly, enriching the response with an id, a price and a flight time:
+
+.NodeJS computing distance, flight time and price
+[source,javascript]
+----
+for (i = 0; i < res.length; i++) {
+    if (res[i].toAirport) {
+        queryTo = res[i].toAirport;
+        geoEnd = {longitude: res[i].geo.lon, latitude: res[i].geo.lat};
+    }
+    if (res[i].fromAirport) {
+        queryFrom = res[i].fromAirport;
+        geoStart = {longitude: res[i].geo.lon, latitude: res[i].geo.lat};
+    }
+}
+
+distance = haversine(geoStart, geoEnd);
+flightTime = Math.round(distance / config.application.avgKmHr);
+price = Math.round(distance * config.application.distanceCostMultiplier);
+
+queryPrep = "SELECT r.id, a.name, s.flight, s.utc, r.sourceairport, r.destinationairport, r.equipment " +
+"FROM `" + config.couchbase.bucket + "` r UNNEST r.schedule s JOIN `" +
+            config.couchbase.bucket + "` a ON KEYS r.airlineid WHERE r.sourceairport='" + queryFrom +
+"' AND r.destinationairport='" + queryTo + "' AND s.day=" + convDate(leave) + " ORDER BY a.name";
+
+//...
+//for each result
+var resCount = flightPaths.length;
+for (r = 0; r < flightPaths.length; r++) {
+    resCount--;
+    flightPaths[r].flighttime = flightTime;
+    flightPaths[r].price = Math.round(price * ((100 - (Math.floor(Math.random() * (20) + 1))) / 100));
+----
+
+==== Return Codes and Values
+`200`: Successfully searched a route.
+
+.200 body
+[source,json]
+----
+{
+    "data": [
+      {
+        "name": "Air France",
+        "flight": "AF479",
+        "equipment": "388",
+        "utc": "11:10:00",
+        "sourceairport": "SFO",
+        "destinationairport": "CDG",
+        "price": 902
+      },
+      {
+        "name": "Delta Air Lines",
+        "flight": "DL783",
+        "equipment": "388",
+        "utc": "13:33:00",
+        "sourceairport": "SFO",
+        "destinationairport": "CDG",
+        "price": 1025
+      }
+    ],
+    "context": [
+        "1st N1QL query",
+        "2nd N1QL query"
+    ]
+}
+----
+
+`500`: Something went wrong.
+
+.500 body
+[source,json]
+----
+{
+    "failure": "message from the service/exception, eg. 'bad request'"
+}
+----
+
+
+
+== User API
+=== login
+
+[source,javascript]
+----
+POST /api/user/login
+----
+
+==== Parameters
+Body (`application/json`) provided by the client:
+
+[source,json]
+----
+{
+    "user": "{username}",
+    "password": "{md5_password}"
+}
+----
+
+==== Execution
+The code tries to authenticate the user by checking there is a `user::{username}` document in store, and that the password field matches.
+In case of success, if JWT is implemented a JWT token is constructed and returned. It will be required for further user-specific interactions: booking flights and retrieving list of bookings.
+
+IMPORTANT: The JWT content must include a `user` "claim" with the username as value.
+
+WARNING: If JWT (JSON Web Token) are not supported by a backend, the token must be the username, encoded in base64. The fronted will need to be configured accordingly, in order to correctly parse the simpler "token".
+
+==== Return Codes and Values
+`200`: User was authenticated (`application/json`). Note these objects have no context.
+
+.200 payload
+[source,json]
+----
+{
+    "data": { "token": "JWT Token in base64 form" }
+}
+----
+
+.200 alternative payload (if JWT not implemented)
+[source,json]
+----
+{
+    "data": { "token": "BASE64-ENCODED-USERNAME" }
+}
+----
+
+`401`: Authentication failure.
+
+=== create user
+
+[source,javascript]
+----
+POST /api/user/signup
+----
+
+==== Parameters
+Body (`application/json`) provided by the client:
+
+[source,json]
+----
+{
+    "user": "{user}",
+    "password": "{md5_password}"
+}
+----
+
+==== Execution
+A document with a key of `user::USERNAME` is created. If it already exists, 409 error is triggered. **Note**: The name can vary and interoperability between SDKs is not required. For instance, the NodeJS backend uses `Ottoman`, which implies its own key pattern.
+
+The content of the document is an object with at least the following structure:
+
+[source,json]
+----
+{
+    "name": "username",
+    "password": "password hash"
+}
+----
+
+Additionally, a JSON Web Token (JWT) is created and returned to the client.
+
+IMPORTANT: The JWT content must include a `user` "claim" with the username as value.
+
+WARNING: If JWT (JSON Web Token) are not supported by a backend, the token must be the username, encoded in base64. The fronted will need to be configured accordingly, in order to correctly parse the simpler "token".
+
+==== Return Codes and Values
+`202`: The user was created successfully. "data" contains a generated JWT token under the `token` entry:
+
+.202 body
+[source,json]
+----
+{
+    "data": { "token": "JWT token" }
+}
+----
+
+`409`: The user already exists.
+
+=== Get user cart
+
+[source,javascript]
+----
+GET /api/user/{username}/flights
+----
+
+==== Parameters
+Url parameters.
+
+|===
+|Param
+|Description
+
+|`username`
+|the username for which to display booked flights.
+|===
+
+==== Authentication
+This operation is subject to authentication. To that end, the JWT token that was returned by the server when logging in / signing up is to be passed through the `Authentication` header, prefixed with `"Bearer "`.
+
+This will be used by the backend to verify the `user` claim inside the token matches the `username` in the URL.
+
+==== Execution
+If there is a JWT token, it is verified and an username extracted. Otherwise the username is directly provided, base64 encoded.
+
+The code checks for a document stored for that particular user (eg. a document with a key of `user::USERNAME`) . If it doesn't exist, 401 is returned.
+
+Inside the document is an array of `flights`, that is returned as this response's "data".
+
+==== Return Codes and Values
+`200`: The booked flights were found. Booked flights that are stored in db for the user are returned in "data"
+
+.200 body
+[source,json]
+----
+{
+    "data": [
+        {
+            "name": "string",
+            "flight": "string",
+            "price": "integer",
+            "date": "string",
+            "sourceairport":"string",
+            "destinationairport":"string",
+            "bookedon":"string"
+        }
+    ]
+}
+----
+
+`401`: If no token/username was provided
+
+`403`: If the token/username couldn't be verified, or document stored that correspond to this user.
+
+
+=== book a flight
+
+[source,javascript]
+----
+POST  /api/user/{username}/flights
+----
+
+==== Parameters
+Url Parameters:
+
+|===
+|Param
+|Description
+
+|`username`
+|the username for which to display booked flights.
+|===
+
+Body payload (`application/json`):
+
+[source,json]
+----
+{
+    "flights": [
+        {
+            "name": "string",
+            "flight": "string",
+            "price": "integer",
+            "date": "string",
+            "sourceairport": "string",
+            "destinationairport": "string"
+        }
+    ]
+}
+----
+
+`name` is the airline's name, while `flight` is the flight's code. `date` is a concatenation of the departure date (in mm/dd/yyyy format) and the flight's departure time in UTC, and the airport entries contain airport codes.
+
+WARNING: The `flights` entries are not directly the same as what is returned during a flight search. Instead of `utc` (the route's departure time), a `date` entry should be constructed, concatenating the leg's date, a space and the `utc` field from the initial response.
+
+==== Authentication
+This operation is subject to authentication. To that end, the JWT token that was returned by the server when logging in / signing up is to be passed through the `Authentication` header, prefixed with `"Bearer "`.
+
+This will be used by the backend to verify the `user` claim inside the token matches the `username` in the URL.
+
+==== Execution
+The code just check for existence of the user document by using the
+username from the token (as `user` claim for JWT, or simply base64 decoded otherwise). Key should be in the form
+`user::USERNAME` for most SDKs.
+
+Inside the document, a `flights` array is added or appended with each
+element of the `flights` array in the payload. Each flight element has
+its `bookedon` field set to a string specific to the used backend (eg.
+"`try-cb-java`" for the Java backend).
+
+==== Return Codes and Values
+`202`: Flights booking were added. Data is each flight booking that was
+added.
+
+.202 body (added flights)
+[source,json]
+----
+{
+    "data": {
+        "added": [
+            {
+            "name": "string",
+            "flight": "string",
+            "price": "integer",
+            "date": "string",
+            "sourceairport": "string",
+            "destinationairport": "string",
+            "bookedon": "string"
+            }
+        ]
+    }
+}
+----
+
+`401`: There is no token/username.
+
+`403`: The token or username can't be verified / doesn't have a corresponding document stored.
+
+`400`: the payload doesn't have a flights array or it is malformed.
+
+== Hotels API (new)
+
+=== The Hotel FTS index
+The FTS index that indexes hotels is named `hotels`. It has the following mappings (at a minimum):
+
+ - name
+ - description
+ - city
+ - country
+ - address
+ - price
+
+=== Find hotel POIs
+
+[source,javascript]
+----
+GET /api/hotels/{description}/{location}
+----
+
+==== Parameters
+URL path parameters.
+
+|===
+|URL part |Description
+
+|`description`
+|First variable in the URL path, the description is a keyword that will be searched for in the content and name fields of the hotels. Special value "`*`" will deactivate this criteria.
+
+|`location`
+|Second variable in the URL path, the location is a keyword that will be searched for in all the address-related fields of the hotels. Special value "`*`" will deactivate this criteria (and if both are deactivated, all hotels are searched for).
+|===
+
+==== Execution
+First one of three FTS queries is executed (depending on the description and location criterias):
+
+.Without location nor description
+[source,json]
+----
+{
+    "size":100,
+    "query": {
+        "field":"type",
+        "term":"hotel"
+    }
+}
+----
+
+.Adding description criteria
+[source,json]
+----
+{
+    "size":100,
+    "query": {
+        "conjuncts": [
+            {"field":"type","term":"hotel"},
+            {"disjuncts":[
+                {"field":"name","match_phrase":"foo"},
+                {"field":"description","match_phrase":"foo"}
+            ]}
+        ]
+    }
+}
+----
+
+.Adding also location criteria
+[source,json]
+----
+{
+    "size":100,
+    "query": {
+        "conjuncts": [
+            {"field":"type","term":"hotel"},
+            {"disjuncts":[
+                {"field":"name","match_phrase":"foo"},
+                {"field":"description","match_phrase":"foo"}
+            ]},
+
+            {"disjuncts":[
+                {"field":"country","match_phrase":"France"},
+                {"field":"city","match_phrase":"France"},
+                {"field":"state","match_phrase":"France"},
+                {"field":"address","match_phrase":"France"}
+            ]}
+        ]
+    }
+}
+----
+
+Then use subdoc to retrieve complete data of each relevant field (even if they are not stored by FTS index):
+
+.subdoc retrieval of stored data in Java
+[source,java]
+----
+for (SearchQueryRow row : result) {
+    DocumentFragment<Lookup> fragment = bucket
+            .lookupIn(row.id())
+            .get("country")
+            .get("city")
+            .get("state")
+            .get("address")
+            .get("name")
+            .get("description")
+            .execute();
+
+    Map<String, Object> map = new HashMap<String, Object>();
+
+    String country = (String) fragment.content("country");
+    String city = (String) fragment.content("city");
+    String state = (String) fragment.content("state");
+    String address = (String) fragment.content("address");
+
+    //...
+}
+----
+
+The country/city/state/address are aggregated into an "address".
+
+The final response payload for a given hotel has "name", "description" and "address" fields.
+
+==== Return Codes and Values
+`200`: Hotel searched without failure.
+
+.200 body
+[source,json]
+----
+{
+    "data": [
+        {
+            "name": "nitenite",
+            "address": "18 Holliday Street, Birmingham, United Kingdom",
+            "description": "The property brands itself as a boutique hotel, where postmodern common space appointments are meant to make up for the ultrasmall (7 sqm) cabins that serve as ensuite rooms."
+        }
+    ],
+    "context": [
+        "the FTS request executed (pretty printed if possible)",
+        "a plain text snippet of subdoc specs (hard wrapped)"
+    ]
+}
+----
+
+`500`: Something went wrong
+
+.500 body
+[source,json]
+----
+{
+    "failure": "error message describing what went wrong"
+}
+----
