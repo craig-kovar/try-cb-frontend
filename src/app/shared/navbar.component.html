@@ -8,8 +8,8 @@
   </div>
   <div class="row">
     <div class="col-xs-12 text-right">
-      <Small>SHOPPING CART:</Small>0 items
-      <small>(total cost | currency )</small>
+      <Small>SHOPPING CART:</Small> {{utilityService.getCart().length}} items
+      <small>($ {{getCost()}})</small>
     </div>
   </div>
   <div class="row">

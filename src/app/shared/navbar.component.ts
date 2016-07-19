@@ -22,4 +22,13 @@ export class NavbarComponent {
       this.router.navigate(["login"]);
     }
   }
+
+  getCost() {
+      let cost = 0;
+      for (var flight of this.utilityService.getCart()) {
+          if (flight.price)
+            cost = cost + flight.price;
+      }
+      return cost;
+  }
 }
