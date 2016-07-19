@@ -18,14 +18,20 @@ export class HomeComponent implements OnInit {
     public utility:UtilityService;
     public to:string = '';
     public from:string = '';
+    public leaves:string = '';
+    public returns:string = null;
     public typeaheadLoading:boolean = false;
     public typeaheadNoResults:boolean = false;
     private _cache:any;
     private _prevContext:any;
+    public outboundData: any[];
+    public inboundData: any[];
+    public choosen: any[];
 
     constructor(auth:AuthService,utility:UtilityService) {
       this.auth=auth;
       this.utility=utility;
+      this.choosen=[];
     }
 
     public getContext():any {
@@ -81,6 +87,51 @@ export class HomeComponent implements OnInit {
       console.log(`Selected value: ${e.item}`);
     }
 
+    public findFlights(from:string, to:string, leaves:string, returns:string):void {
+        this.utility.makeGetRequestObs(environment.devHost + "/api/flightPaths",[from, to],"leave="+leaves)
+            .map((response: Response) => response.json())
+            .subscribe(
+                (val: any) => {
+                    this.outboundData = val.data;
+                },
+                (error: any) => {
+                    this.outboundData = null;
+                    console.log("Error finding outbound flights: " + error);
+                }
+            );
+
+        if (returns) {
+            this.utility.makeGetRequestObs(environment.devHost + "/api/flightPaths",[to, from],"leave=" + returns)
+                .map((response: Response) => response.json())
+                .subscribe(
+                    (val: any) => {
+                        this.inboundData = val.data;
+                    },
+                    (error: any) => {
+                        this.inboundData = null;
+                        console.log("Error finding inbound flights: " + error);
+                    }
+                );
+        }
+    }
+
+    public choose(row: any, date: string): void {
+        this.choosen.push(row);
+        let cart = this.utility.getCart();
+        cart.push({
+            "name": row.name,
+            "flight": row.flight,
+            "price": row.price,
+            "date": date + " " + row.utc,
+            "sourceairport": row.sourceairport,
+            "destinationairport": row.destinationairport
+        });
+        localStorage.setItem("cart", JSON.stringify(cart));
+    }
+
+    public inCart(row: any): boolean {
+        return this.choosen.indexOf(row) != -1;
+    }
 
   ngOnInit() {
   }
