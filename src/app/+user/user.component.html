@@ -20,15 +20,17 @@
                     <th>Date</th>
                     <th>From</th>
                     <th>To</th>
+                    <th>Price</th>
                     <th>Booked Via</th>
                 </tr>
             </thead>
             <tbody>
                 <tr *ngFor="let b of booked">
-                    <td>{{b.name}}</td>
+                    <td>{{b.name}} {{b.flight}}</td>
                     <td>{{b.date}}</td>
                     <td>{{b.sourceairport}}</td>
                     <td>{{b.destinationairport}}</td>
+                    <td>{{b.price}}$</td>
                     <td>{{b.bookedon}}</td>
                 </tr>
             </tbody>
