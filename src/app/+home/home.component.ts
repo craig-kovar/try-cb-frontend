@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Response } from "@angular/http";
 import { CORE_DIRECTIVES, FORM_DIRECTIVES } from '@angular/common';
 import { UtilityService } from '../shared';
 import { environment } from "./../../app/";
@@ -33,12 +34,14 @@ export class HomeComponent implements OnInit {
 
     public getToAirport(context:any):Function {
       this._prevContext = context;
+
       let f:Function = function ():Promise<string[]> {
         let p:Promise<string[]> = new Promise((resolve:Function) => {
           setTimeout(() => {
-            context.utility.makeGetRequest(environment.devHost + "/api/airport/findAll",[context.auth.getToken(),context.to])
-            .then((result) => { (result)
-                return resolve(result);
+            context.utility.makeGetRequest(environment.devHost + "/api/airports?search="+ context.to,[])
+            .then((result: Response) => {
+                let data = UtilityService.extractData(result);
+                return resolve(data);
               })
             }, 200);
         });
@@ -53,9 +56,10 @@ export class HomeComponent implements OnInit {
       let f:Function = function ():Promise<string[]> {
         let p:Promise<string[]> = new Promise((resolve:Function) => {
           setTimeout(() => {
-            context.utility.makeGetRequest(environment.devHost + "/api/airport/findAll",[context.auth.getToken(),context.from])
-            .then((result) => { (result)
-                return resolve(result);
+            context.utility.makeGetRequest(environment.devHost + "/api/airports?search="  + context.from, [])
+            .then((result: Response) => {
+                let data = UtilityService.extractData(result);
+                return resolve(data);
               })
             }, 200);
         });

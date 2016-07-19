@@ -1,5 +1,5 @@
 import { Component, Injectable, Inject  } from '@angular/core';
-import { AuthService } from './';
+import { AuthService, UtilityService } from './';
 import { Router, Routes , ROUTER_DIRECTIVES, ROUTER_PROVIDERS } from '@angular/router'
 
 @Component({
@@ -11,10 +11,12 @@ import { Router, Routes , ROUTER_DIRECTIVES, ROUTER_PROVIDERS } from '@angular/r
 
 export class NavbarComponent {
   authService:AuthService;
+  utilityService:UtilityService;
   router:Router;
 
-  constructor(authService:AuthService,router:Router) {
+  constructor(authService:AuthService, utilityService:UtilityService,router:Router) {
     this.authService=authService;
+    this.utilityService=utilityService;
     this.router=router;
     if(!this.authService.isAuthenticated()){
       this.router.navigate(["login"]);

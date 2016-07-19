@@ -20,8 +20,7 @@ export class CartComponent implements OnInit {
       this.utility = utility;
   }
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   createFakeBooking() {
       let flight = {
@@ -33,9 +32,11 @@ export class CartComponent implements OnInit {
               "destinationairport": "SFO"
           } ]
       };
-      return this.utility.makePostRequest(environment.baseApiUrl + "/api/user/flights", [], flight).then((response: any) => {
-          let result = response.data as any;
-          this.added = result.added;
+      return this.utility.makePostRequest(environment.devHost + "/api/user/flights", [], flight, true).then((response: Response) => {
+          let data = UtilityService.extractData(response);
+          let narration = UtilityService.extractNarration(response);
+          console.log(narration);
+          this.added = data.added;
           this.error = null;
       }, (error) => {
           this.added = null;

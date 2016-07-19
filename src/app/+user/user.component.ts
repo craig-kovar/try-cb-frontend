@@ -24,11 +24,11 @@ export class UserComponent implements OnInit {
   }
 
   ngOnInit() {
-      this.user = this.authService.getUser();
+      this.user = this.utility.getUser();
 
       var searchParams = "username=" + this.user;
 
-      this.utility.makeGetRequestObs(environment.baseApiUrl, ["api", "user", "flights"], searchParams)
+      this.utility.makeGetRequestObs(environment.devHost, ["api", "user", "flights"], searchParams, true)
         .map((response: Response) => response.json())
         .subscribe(
         (val) => {

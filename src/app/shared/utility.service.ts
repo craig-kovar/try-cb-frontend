@@ -13,7 +13,7 @@ export class UtilityService {
         this.http = http;
     }
 
-    makePostRequest(url: string, params: Array<string>, body: Object) {
+    makePostRequest(url: string, params: Array<string>, body: Object, authenticate: boolean=false) {
         var fullUrl: string = url;
         if(params && params.length > 0) {
             fullUrl = fullUrl + "/" + params.join("/");
@@ -22,6 +22,10 @@ export class UtilityService {
         return new Promise((resolve, reject) => {
             var requestHeaders = new Headers();
             requestHeaders.append("Content-Type", "application/json");
+            if (authenticate) {
+                let token = this.getToken();
+                if (token) requestHeaders.append('Authentication', 'Bearer ' + token);
+            }
             this.http.request(new Request({
                 method: RequestMethod.Post,
                 url: fullUrl,
@@ -30,41 +34,19 @@ export class UtilityService {
             }))
             .subscribe((success) => {
                 console.log("DEBUG: POST RESPONSE:",fullUrl,":",success.json());
-                resolve(success.json());
+                resolve(success);
             }, (error) => {
-                reject(error.json());
+                reject(error);
             });
         });
     }
 
-    makeFileRequest(url: string, params: Array<string>, file:File, description:string, userId: string, taskId:string) {
-
-        return new Promise((resolve, reject)=> {
-            var formData:any = new FormData();
-
-            formData.append('upl', file, file.name);
-            formData.append('description', description);
-            formData.append('userId', userId);
-            formData.append('taskId', taskId);
-
-            var xhr = new XMLHttpRequest();
-
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4) {
-                    if (xhr.status == 200) {
-                        resolve(JSON.parse(xhr.response)); // NOT Json by default, it must be parsed.
-                    } else {
-                        reject(xhr.response);
-                    }
-                }
-            }
-            xhr.open('POST', '/api/cdn/add', true);
-            xhr.send(formData);
-        });
-    }
-
-    makeGetRequestObs(url: string, params: Array<string>, searchParams?: string) {
-        let headers = new Headers({ 'Content-Type': 'application/json' });
+    makeGetRequestObs(url: string, params: Array<string>, searchParams?: string, authenticate?: boolean) {
+        let headers = new Headers({ 'Content-Type': 'application/json'});
+        if (authenticate) {
+            let token = this.getToken();
+            if (token) headers.append('Authentication', 'Bearer ' + token);
+        }
         let options = new RequestOptions({headers: headers});
 
         var fullUrl: string = url;
@@ -88,9 +70,14 @@ export class UtilityService {
         .catch(UtilityService.extractError);
     }
 
-    private extractData(res: Response) {
+    public static extractData(res: Response): any {
         let body = res.json();
         return body.data || { };
+    }
+
+    public static extractNarration(res: Response): any {
+        let body = res.json();
+        return body.context || [];
     }
 
     public static extractError(res: Response): Observable<Response> {
@@ -110,13 +97,36 @@ export class UtilityService {
         let obs = this.makeGetRequestObs(url, params);
         return new Promise((resolve, reject) => {
             obs
-            .map(this.extractData)
             .subscribe((success) => {
                 resolve(success);
             }, (error) => {
                 reject(error);
             });
         });
+    }
+
+    getUser(){
+        let user = localStorage.getItem("user");
+        if (user) {
+            return user;
+        }
+        return null;
+    }
+
+    getToken() {
+      let token = localStorage.getItem("token");
+      if (token) {
+          return token;
+      }
+      return null;
+    }
+
+    getCart() {
+        let cart = localStorage.getItem("cart");
+        if (cart) {
+            return JSON.parse(cart);
+        }
+        return [];
     }
 
 }

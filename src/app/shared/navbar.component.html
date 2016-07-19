@@ -2,7 +2,7 @@
   <div class="row">
     <div class="col-xs-12 text-right">
       <small>LOGGED IN AS:</small>
-      {{authService.getUser()}}
+      {{utilityService.getUser()}}
       <a href = "#" (click)="authService.deAuthenticate()">| LOGOUT</a>
     </div>
   </div>

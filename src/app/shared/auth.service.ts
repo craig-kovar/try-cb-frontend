@@ -1,4 +1,5 @@
 import { Injectable, Inject } from "@angular/core";
+import { Response } from "@angular/http";
 import { IUser,IToken } from "./interfaces";
 import { UtilityService } from "./utility.service";
 import { environment } from "./../../app/";
@@ -26,39 +27,28 @@ export class AuthService {
     }
   }
 
-  getUser(){
-    if (localStorage.getItem("user")) {
-            return localStorage.getItem("user");
-        }
-  }
-
-  getToken(){
-    if(localStorage.getItem("token")){
-      return localStorage.getItem("token");
-    }
-  }
-
 login(email: string, password: string) {
   return new Promise((resolve, reject) => {
-    this.utility.makeGetRequest(environment.baseApiUrl + "/api/user/login", [email, md5(password)]).then((result) => {
-      if (result) {
-        if (environment.jwtEnabled) {
-            let cToken = result as IToken;
-            if (cToken.status != "success") {
-              reject(cToken.status);
-              return;
+    this.utility.makePostRequest(environment.devHost + "/api/user/login", [], {"user": email, "password": md5(password)}).then((res: Response) => {
+      let result = UtilityService.extractData(res);
+      if (result.token && environment.jwtEnabled) {
+            try {
+                let decodedToken = this.jwt.decodeToken(result.token);
+                localStorage.setItem("user", decodedToken.user);
+                localStorage.setItem("token", result.token);
+                resolve();
+            } catch (e) {
+                reject("Backend created account but returned a malformed token: " + e);
             }
-            localStorage.setItem("user", this.jwt.decodeToken(cToken.token).user);
-            localStorage.setItem("token", cToken.token);
+        } else if (result.token) {
+            let user = this.jwt.urlBase64Decode(result.token);
+            localStorage.setItem("user", user);
+            localStorage.setItem("token", result.token);
             resolve();
         } else {
-            let user = result as any;
-            localStorage.setItem("user", user.name);
-            resolve();
+            console.log("DEBUG: login failure, got " + JSON.stringify(result));
+            reject("No token found in login response");
         }
-      } else {
-        reject("User Error");
-      }
     }, (error) => {
       reject(error);
     });
@@ -68,27 +58,24 @@ login(email: string, password: string) {
 register(email: string, password:string) {
   let cUser: IUser = { user: email, password: md5(password) };
   return new Promise((resolve, reject) => {
-    this.utility.makePostRequest(environment.baseApiUrl + "/api/user/login", [], cUser).then((response) => {
-      let result = response as any;
-      if (environment.jwtEnabled && result.data.token) {
+    this.utility.makePostRequest(environment.devHost + "/api/user/signup", [], cUser).then((res: Response) => {
+      let result = UtilityService.extractData(res);
+      if (environment.jwtEnabled && result && result.token) {
           try {
-              let cToken = result as IToken;
-              if (cToken.status != "success") {
-                reject(cToken.status);
-                return;
-              }
-              localStorage.setItem("user", this.jwt.decodeToken(cToken.token).user);
-              localStorage.setItem("token", cToken.token);
-
+              let decodedToken = this.jwt.decodeToken(result.token);
+              localStorage.setItem("user", decodedToken.user);
+              localStorage.setItem("token", result.token);
               resolve();
           } catch (e) {
               reject("Backend created account but returned a malformed token: " + e);
           }
-      } else if (result.data.name) {
-          localStorage.setItem("user", result.data.name);
+      } else if (result && result.token) {
+          let user = this.jwt.urlBase64Decode(result.token);
+          localStorage.setItem("user", user);
+          localStorage.setItem("token", result.token);
           resolve();
       } else {
-        console.log("DEBUG: registration failure, got " + JSON.stringify(result.data));
+        console.log("DEBUG: registration failure, got " + JSON.stringify(result));
         reject("Registration Failure");
       }
     }, (error) => {

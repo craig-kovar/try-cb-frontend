@@ -50,7 +50,7 @@ export class HotelsComponent implements OnInit, OnDestroy {
       var location = value.location;
       var description = value.description;
 
-      var url = environment.baseApiUrl + "/api/hotel/";
+      var url = environment.devHost + "/api/hotel/";
       var hasDescription = (description != null && description != "");
       var hasLocation = (location != null && location != "");
       if (hasDescription && hasLocation) {
