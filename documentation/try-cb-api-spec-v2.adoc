@@ -384,7 +384,8 @@ WARNING: If JWT (JSON Web Token) are not supported by a backend, the token must 
 [source,json]
 ----
 {
-    "data": { "token": "JWT token" }
+    "data": { "token": "JWT token" },
+    "context": [ "message indicating what document was created (key, bucket, expiry)" ]
 }
 ----
 
@@ -521,7 +522,8 @@ added.
             "bookedon": "string"
             }
         ]
-    }
+    },
+    "context": [ "message indicating in which document key the flight was added"]
 }
 ----
 
