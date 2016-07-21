@@ -357,7 +357,9 @@ Body (`application/json`) provided by the client:
 ----
 
 ==== Execution
-A document with a key of `user::USERNAME` is created. If it already exists, 409 error is triggered. **Note**: The name can vary and interoperability between SDKs is not required. For instance, the NodeJS backend uses `Ottoman`, which implies its own key pattern.
+A document with a key of `user::USERNAME` is created. If it already exists, 409 error is triggered.
+
+**Note**: The name and destination bucket can vary and interoperability between SDKs is not required. For instance, the NodeJS backend uses `Ottoman`, which implies its own key pattern, and in the Java SDK the bucket can be configured ("default" bucket is otherwise used) and the document can optionally be created with an expiry (configurable as well).
 
 The content of the document is an object with at least the following structure:
 
