@@ -21,7 +21,7 @@ import { Observable } from 'rxjs/Rx';
 
 @Injectable()
 
-export class HotelsComponent implements OnInit, OnDestroy {
+export class HotelsComponent implements OnInit {
 
   hotelForm: ControlGroup;
   utility: UtilityService;
@@ -38,13 +38,7 @@ export class HotelsComponent implements OnInit, OnDestroy {
     this._narrations = narrationService;
   }
 
-  ngOnInit() {
-      this._narrations.add("Entered Hotels component", "You navigated to the Hotels search form");
-  }
-
-  ngOnDestroy() {
-      this._narrations.clear();
-  }
+  ngOnInit() { }
 
   findHotels(value: any): void {
       var location = value.location;
@@ -61,7 +55,8 @@ export class HotelsComponent implements OnInit, OnDestroy {
           url = url + description + "/"
       }
 
-      this._narrations.addPre("GET to " + url, "The search parameters were:", JSON.stringify(value));
+      this._narrations.addSeparator("HOTEL: Find Hotels");
+      this._narrations.add("GET to " + url, "");
 
     this.utility.makeGetRequestObs(url, [])
     .map((response: Response) => response.json())

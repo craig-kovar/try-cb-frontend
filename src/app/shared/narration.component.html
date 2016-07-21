@@ -1,14 +1,18 @@
-<div *ngIf="model && model.length > 0">
-<div class="narration" [hidden]="!collapsed">(<a (click)="toggleCollapse()">Show Narration</a>)</div>
-<div class="container col-md-12" [hidden]="collapsed">
+<div *ngIf="model">
+<div class="narration" *ngIf="!collapsed">(<a (click)="toggleCollapse()">Show Narration</a>)</div>
+<div class="container col-md-12" *ngIf="collapsed">
 <div class="panel panel-default narration">
     <div class="panel-heading narration">
-        <span class="panel-title">Narration (<a (click)="toggleCollapse()">hide</a>)</span>
+        <span class="panel-title">Narration (<a (click)="toggleCollapse()">hide</a>/<a (click)="clear()">clear</a>)</span>
     </div>
     <div class="panel-body console">
         <ul>
-            <li *ngFor="let narration of model"  (click)="select(narration)">
-                <span class="bullet" [class.selected]="narration == selected">&gt;</span><span class="bullet selected" *ngIf="narration == selected">&gt;</span><span *ngIf="narration != selected">&nbsp;</span> <span class="desc">{{narration.step}}</span></li>
+            <li *ngFor="let narration of model">
+                <div class="clickable" *ngIf="narration.step != separator" (click)="select(narration)">
+                <span class="bullet" [class.selected]="narration == selected">&gt;</span><span class="bullet selected" *ngIf="narration == selected">&gt;</span><span *ngIf="narration != selected">&nbsp;</span> <span class="desc">{{narration.step}}</span></div>
+
+                <div *ngIf="narration.step == separator"><br/>--[ {{narration.narration}} ]--</div>
+            </li>
         </ul>
     </div>
     <div class="panel-body">

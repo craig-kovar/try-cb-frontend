@@ -3,7 +3,7 @@ import { Response } from "@angular/http";
 import { CORE_DIRECTIVES, FORM_DIRECTIVES } from '@angular/common';
 import { UtilityService } from '../shared';
 import { environment } from "./../../app/";
-import { AuthService } from '../shared';
+import { AuthService, NarrationService } from '../shared';
 import { TYPEAHEAD_DIRECTIVES } from 'ng2-bootstrap/ng2-bootstrap';
 
 @Component({
@@ -16,6 +16,8 @@ import { TYPEAHEAD_DIRECTIVES } from 'ng2-bootstrap/ng2-bootstrap';
 export class HomeComponent implements OnInit {
     public auth:AuthService;
     public utility:UtilityService;
+    narrationService: NarrationService;
+
     public to:string = '';
     public from:string = '';
     public leaves:string = '';
@@ -28,7 +30,8 @@ export class HomeComponent implements OnInit {
     public inboundData: any[];
     public choosen: any[];
 
-    constructor(auth:AuthService,utility:UtilityService) {
+    constructor(auth:AuthService,utility:UtilityService, narrationService: NarrationService) {
+      this.narrationService = narrationService;
       this.auth=auth;
       this.utility=utility;
       this.choosen=[];
@@ -47,6 +50,8 @@ export class HomeComponent implements OnInit {
             context.utility.makeGetRequest(environment.devHost + "/api/airports?search="+ context.to,[])
             .then((result: Response) => {
                 let data = UtilityService.extractData(result);
+                let narration = UtilityService.extractNarration(result);
+                context.narrationService.addPre("N1QL typeahead for To = "  + context.to, "The following N1QL query was executed on the server:" , narration[0]);
                 return resolve(data);
               })
             }, 200);
@@ -65,6 +70,8 @@ export class HomeComponent implements OnInit {
             context.utility.makeGetRequest(environment.devHost + "/api/airports?search="  + context.from, [])
             .then((result: Response) => {
                 let data = UtilityService.extractData(result);
+                let narration = UtilityService.extractNarration(result);
+                context.narrationService.addPre("N1QL typeahead for From = "  + context.from, "The following N1QL query was executed on the server:" , narration[0]);
                 return resolve(data);
               })
             }, 200);
@@ -88,28 +95,51 @@ export class HomeComponent implements OnInit {
     }
 
     public findFlights(from:string, to:string, leaves:string, returns:string):void {
+        let narrationUrl = environment.devHost + "/api/flightPaths/" + from + "/" + to + "?leave=" + leaves;
+        this.narrationService.addSeparator("HOME: Find Flight");
+        this.narrationService.add("Outbound leg GET to " + narrationUrl, "");
+
         this.utility.makeGetRequestObs(environment.devHost + "/api/flightPaths",[from, to],"leave="+leaves)
             .map((response: Response) => response.json())
             .subscribe(
                 (val: any) => {
                     this.outboundData = val.data;
+                    //we expect 2 context requests
+                    if (val.context.length == 2) {
+                        this.narrationService.addPre("Outbound leg N1QL query 1 executed in the backend", "The following N1QL query was executed in the backend:", val.context[0]);
+                        this.narrationService.addPre("Outbound leg N1QL query 2 executed in the backend", "The following N1QL query was executed in the backend:", val.context[1]);
+                        this.narrationService.add("Outbound leg SUCCESS", "Found " + val.data.length + " matching outbound flights");
+                    } else {
+                        this.narrationService.fallbackPre(2, "Outbound leg SUCCESS (found " + val.data.length + " matching outbound flights)", val.context);
+                    }
                 },
                 (error: any) => {
                     this.outboundData = null;
-                    console.log("Error finding outbound flights: " + error);
+                    this.narrationService.addPre("Outbound leg ERROR", "finding outbound flights: ", JSON.stringify(error));
                 }
             );
 
         if (returns) {
+            let narrationUrl = environment.devHost + "/api/flightPaths/" + to + "/" + from + "?leave=" + returns;
+            this.narrationService.add("Return leg GET to " + narrationUrl, "");
+
             this.utility.makeGetRequestObs(environment.devHost + "/api/flightPaths",[to, from],"leave=" + returns)
                 .map((response: Response) => response.json())
                 .subscribe(
                     (val: any) => {
                         this.inboundData = val.data;
+                        //we expect 2 context requests
+                        if (val.context.length == 2) {
+                            this.narrationService.addPre("Return leg N1QL query 1 executed in the backend", "The following N1QL query was executed in the backend:", val.context[0]);
+                            this.narrationService.addPre("Return leg N1QL query 2 executed in the backend", "The following N1QL query was executed in the backend:", val.context[1]);
+                            this.narrationService.add("Return leg SUCCESS", "Found " + val.data.length + " matching return flights");
+                        } else {
+                            this.narrationService.fallbackPre(2, "Return legSUCCESS (found " + val.data.length + " matching return flights)", val.context);
+                        }
                     },
                     (error: any) => {
                         this.inboundData = null;
-                        console.log("Error finding inbound flights: " + error);
+                        this.narrationService.addPre("Return leg ERROR", "finding return flights: ", JSON.stringify(error));
                     }
                 );
         }

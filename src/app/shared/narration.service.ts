@@ -15,6 +15,7 @@ export class Narration {
 @Injectable()
 export class NarrationService {
     dataArray: Narration[] = [];
+    separatorKeyword: string = "SEPARATOR";
 
     clear() {
         this.dataArray.length = 0;
@@ -26,6 +27,10 @@ export class NarrationService {
 
     addPre(step: string, details: string, pre: string) {
         this.dataArray.push(new Narration(step, details, pre));
+    }
+
+    addSeparator(transactionTitle: string) {
+        this.dataArray.push(new Narration(this.separatorKeyword, transactionTitle));
     }
 
     fallbackPre(expectedPreCount: number, genericMessage: string, realPre: string[]) {

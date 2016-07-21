@@ -11,6 +11,7 @@ import { Narration, NarrationService } from './narration.service'
 export class NarrationComponent implements OnInit {
   model: Narration[];
   selected: Narration;
+  separator: string;
   collapsed: boolean = true;
   expandedPre: boolean;
   showExpandPre: boolean;
@@ -22,6 +23,7 @@ export class NarrationComponent implements OnInit {
 
   ngOnInit() {
       this.model = this._sharedService.dataArray;
+      this.separator = this._sharedService.separatorKeyword;
       this.selected = this.model[0];
   }
 
@@ -37,6 +39,12 @@ export class NarrationComponent implements OnInit {
 
   expandPre() {
       this.expandedPre = !this.expandedPre;
+  }
+
+  clear() {
+      this._sharedService.clear();
+      this.expandedPre = false;
+      this.selected = null;
   }
 
 }

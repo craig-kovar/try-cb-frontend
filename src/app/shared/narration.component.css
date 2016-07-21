@@ -29,10 +29,13 @@ div.console {
 
 div.console li {
     list-style-type: none;
+}
+
+div.console div.clickable {
     cursor: pointer;
 }
 
-div.console li:hover {
+div.console div.clickable:hover {
     color: yellow;
 }
 
