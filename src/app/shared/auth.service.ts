@@ -2,6 +2,7 @@ import { Injectable, Inject } from "@angular/core";
 import { Response } from "@angular/http";
 import { IUser,IToken } from "./interfaces";
 import { UtilityService } from "./utility.service";
+import { NarrationService } from "./narration.service";
 import { environment } from "./../../app/";
 import { md5 } from './md5';
 import { JwtHelper } from './angular2-jwt';
@@ -12,10 +13,12 @@ import { Router } from '@angular/router'
 export class AuthService {
 
   utility: UtilityService;
+  narrationService:NarrationService;
   jwt: JwtHelper;
 
-  constructor(utility: UtilityService) {
+  constructor(utility: UtilityService, narrationService:NarrationService) {
     this.utility = utility;
+    this.narrationService = narrationService;
     this.jwt = new JwtHelper();
   }
 
@@ -60,6 +63,8 @@ register(email: string, password:string) {
   return new Promise((resolve, reject) => {
     this.utility.makePostRequest(environment.devHost + "/api/user/signup", [], cUser).then((res: Response) => {
       let result = UtilityService.extractData(res);
+      let narration = UtilityService.extractNarration(res);
+      this.narrationService.addPre("Account Created", "The account for " + email + " was created on the server", narration[0]);
       if (environment.jwtEnabled && result && result.token) {
           try {
               let decodedToken = this.jwt.decodeToken(result.token);
