@@ -68,6 +68,7 @@ export class HotelsComponent implements OnInit, OnDestroy {
     .subscribe(
         (val: any) => {
             this.data = val.data;
+            this.error = null;
 
             //we expect 2 context requests
             if (val.context.length == 2) {

@@ -45,7 +45,7 @@ export class CartComponent implements OnInit {
           let data = UtilityService.extractData(response);
           let narration = UtilityService.extractNarration(response);
           console.log(narration);
-          remove(flight);
+          this.remove(flight);
           this.added = data.added;
           this.error = null;
       }, (error) => {

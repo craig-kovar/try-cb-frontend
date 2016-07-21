@@ -37,11 +37,11 @@
 
 <div class="panel panel-default" *ngIf="data">
     <div class="panel-heading">
-        <h3 class="panel-title">Matching POIs</h3>
+        <h3 class="panel-title">Matching Hotels</h3>
     </div>
     <div class="panel-body">
         <div *ngIf="data.length == 0">
-            No matching POI
+            No matching Hotels
         </div>
         <table *ngIf="data.length > 0" class="table table-striped">
             <thead>
@@ -62,7 +62,7 @@
     </div>
     <div class="panel-footer">
         <span *ngIf="data.length">
-        {{data.length}} matching point of interests (note that some might not be hotels).</span>
+        {{data.length}} matching hotels.</span>
     </div>
 </div>
 
