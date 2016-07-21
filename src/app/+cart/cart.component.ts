@@ -40,7 +40,8 @@ export class CartComponent implements OnInit {
       let flights = {
         "flights": [ flight ]
       };
-      return this.utility.makePostRequest(environment.devHost + "/api/user/flights", [], flights, true).then((response: Response) => {
+      let user:string = this.utility.getUser();
+      return this.utility.makePostRequest(environment.devHost + "/api/user/", [user, "flights"], flights, true).then((response: Response) => {
           let data = UtilityService.extractData(response);
           let narration = UtilityService.extractNarration(response);
           console.log(narration);
