@@ -1,15 +1,12 @@
 import { Component, OnInit, Injectable } from '@angular/core';
 import { Response } from '@angular/http';
-import { ROUTER_DIRECTIVES } from '@angular/router'
 import { AuthService, IUser, UtilityService } from '../shared';
-import { environment } from "../";
+import { environment } from "../environment";
 
 @Injectable()
 @Component({
-  moduleId: module.id,
   selector: 'app-user',
-  templateUrl: 'user.component.html',
-  directives: [ ROUTER_DIRECTIVES ]
+  templateUrl: 'user.component.html'
 })
 export class UserComponent implements OnInit {
   authService: AuthService;

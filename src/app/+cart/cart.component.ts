@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Response } from '@angular/http';
 import { AuthService, IUser, UtilityService, NarrationService } from '../shared';
-import { environment } from '../';
+import { environment } from '../environment';
 
 @Component({
-  moduleId: module.id,
   selector: 'app-cart',
   templateUrl: 'cart.component.html'
 })

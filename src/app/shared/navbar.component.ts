@@ -1,12 +1,11 @@
 import { Component, Injectable, Inject  } from '@angular/core';
-import { AuthService, UtilityService } from './';
-import { Router, Routes , ROUTER_DIRECTIVES, ROUTER_PROVIDERS } from '@angular/router'
+import { AuthService } from './auth.service';
+import { UtilityService } from './utility.service';
+import { Router } from '@angular/router';
 
 @Component({
-  moduleId: module.id,
   selector: 'app-navbar',
-  templateUrl: 'navbar.component.html',
-  directives: [ROUTER_DIRECTIVES]
+  templateUrl: 'navbar.component.html'
 })
 
 export class NavbarComponent {

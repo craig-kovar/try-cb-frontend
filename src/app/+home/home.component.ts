@@ -1,15 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Response } from "@angular/http";
-import { CORE_DIRECTIVES, FORM_DIRECTIVES } from '@angular/common';
 import { UtilityService } from '../shared';
-import { environment } from "./../../app/";
+import { environment } from "../environment";
 import { AuthService, NarrationService } from '../shared';
-import { TYPEAHEAD_DIRECTIVES } from 'ng2-bootstrap/ng2-bootstrap';
 
 @Component({
-  moduleId: module.id,
   selector: 'app-home',
-  directives: [TYPEAHEAD_DIRECTIVES, CORE_DIRECTIVES, FORM_DIRECTIVES],
   templateUrl: 'home.component.html'
 })
 

@@ -3,7 +3,6 @@ import { AuthService } from '../shared';
 import { Router } from '@angular/router'
 
 @Component({
-  moduleId: module.id,
   selector: 'app-login',
   templateUrl: 'login.component.html'
 })

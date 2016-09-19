@@ -1,4 +1,4 @@
-import {provide, Injectable} from '@angular/core';
+import { Injectable} from '@angular/core';
 import {Http, Headers, Request, RequestOptions, RequestOptionsArgs, RequestMethod, Response} from '@angular/http';
 import {Observable} from 'rxjs/Observable';
 
@@ -242,12 +242,3 @@ export function tokenNotExpired(tokenName = 'id_token', jwt?:string):boolean {
 
   return token && !jwtHelper.isTokenExpired(token, null);
 }
-
-export const AUTH_PROVIDERS: any = [
-  provide(AuthHttp, {
-    useFactory: (http: Http) => {
-      return new AuthHttp(new AuthConfig(), http);
-    },
-    deps: [Http]
-  })
-];
