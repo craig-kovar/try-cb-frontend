@@ -17,9 +17,6 @@ export class NavbarComponent {
     this.authService=authService;
     this.utilityService=utilityService;
     this.router=router;
-    if(!this.authService.isAuthenticated()){
-      this.router.navigate(["login"]);
-    }
   }
 
   getCost() {

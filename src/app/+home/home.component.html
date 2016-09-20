@@ -26,7 +26,7 @@
                                         <span class="input-group-addon">From</span>
                                         <input [(ngModel)]="from"
                                              [ngModelOptions]="{standalone: true}"
-                                             [typeahead]="getFromAirport(getContext())"
+                                             [typeahead]="getFromAirport()"
                                              (typeaheadLoading)="changeTypeaheadLoading($event)"
                                              (typeaheadNoResults)="changeTypeaheadNoResults($event)"
                                              (typeaheadOnSelect)="typeaheadOnSelect($event)"
@@ -38,7 +38,7 @@
                                         <span class="input-group-addon ">To</span>
                                         <input [(ngModel)]="to"
                                              [ngModelOptions]="{standalone: true}"
-                                             [typeahead]="getToAirport(getContext())"
+                                             [typeahead]="getToAirport()"
                                              (typeaheadLoading)="changeTypeaheadLoading($event)"
                                              (typeaheadNoResults)="changeTypeaheadNoResults($event)"
                                              (typeaheadOnSelect)="typeaheadOnSelect($event)"

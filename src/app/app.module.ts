@@ -8,6 +8,8 @@ import { routing } from './app.routes';
 
 import { AppComponent } from './app.component';
 import { AuthService,UtilityService, NavbarComponent, NarrationComponent, Narration, NarrationService } from './shared';
+import { OnlyLoggedInGuard } from './app.guards.auth.ts';
+import { OnlyNotLoggedInGuard } from './app.guards.notlogged.ts';
 import { HomeComponent } from './+home';
 import { LoginComponent } from './+login';
 import { UserComponent } from './+user';
@@ -33,7 +35,13 @@ import { HotelsComponent } from './+hotels';
     HttpModule,
     TypeaheadModule
   ],
-  providers: [ AuthService, UtilityService, NarrationService ],
+  providers: [
+      AuthService,
+      UtilityService,
+      NarrationService,
+      OnlyLoggedInGuard,
+      OnlyNotLoggedInGuard
+  ],
   bootstrap: [ AppComponent ]
 })
 export class AppModule { }

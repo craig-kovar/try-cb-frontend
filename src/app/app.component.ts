@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService, NarrationService } from './shared';
+import { AuthService } from './shared';
 import { Http, Request, RequestMethod, Headers } from "@angular/http";
 
 @Component({
@@ -11,14 +11,8 @@ import { Http, Request, RequestMethod, Headers } from "@angular/http";
 export class AppComponent {
   router: Router;
   authService: AuthService;
-  narrationService: NarrationService;
-
-  constructor(router:Router,authService:AuthService, narrationService: NarrationService){
+  constructor(router:Router,authService:AuthService){
     this.authService=authService;
     this.router=router;
-    if(!this.authService.isAuthenticated()){
-      this.router.navigate(["login"]);
-    }
-    this.narrationService = narrationService;
   }
 }
