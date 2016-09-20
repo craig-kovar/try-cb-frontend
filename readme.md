@@ -8,6 +8,16 @@ Travel-Sample Application for CB 4.5 including support for new features :
 
 This application uses Angular 2.0 and typescript.  The developer environment requires Angular-CLI to build.
 
+## Versionning
+
+**This is version `2.0.0`**
+
+The aim is to build a distributable package that can be embedded in the various `try-cb` backend implementations.
+
+Each time a new stabilized version is made, the version minor or major number should be increased and the build should be copied over to all try-cb backends.
+
+The distribution's version number should be reflected in a tag and be also visible in the app's footer (see `app/app.component.html`).
+
 ## Steps to Build
  - [1] Install NPM 6.0.0 or later
 
