@@ -25,7 +25,8 @@
                                     <div class="input-group">
                                         <span class="input-group-addon">From</span>
                                         <input [(ngModel)]="from"
-                                             [typeahead]="getFromAirport(getContext())"
+                                             [ngModelOptions]="{standalone: true}"
+                                             [typeahead]="getFromAirport()"
                                              (typeaheadLoading)="changeTypeaheadLoading($event)"
                                              (typeaheadNoResults)="changeTypeaheadNoResults($event)"
                                              (typeaheadOnSelect)="typeaheadOnSelect($event)"
@@ -36,7 +37,8 @@
                                              class="input-sm form-control">
                                         <span class="input-group-addon ">To</span>
                                         <input [(ngModel)]="to"
-                                             [typeahead]="getToAirport(getContext())"
+                                             [ngModelOptions]="{standalone: true}"
+                                             [typeahead]="getToAirport()"
                                              (typeaheadLoading)="changeTypeaheadLoading($event)"
                                              (typeaheadNoResults)="changeTypeaheadNoResults($event)"
                                              (typeaheadOnSelect)="typeaheadOnSelect($event)"
@@ -61,9 +63,11 @@
                                         <div class="input-group">
                                             <span class="input-group-addon">Leave</span>
                                             <input type="text" class="input-sm form-control" name="start" id="leaveDate" [(ngModel)]="leaves"
+                                                 [ngModelOptions]="{standalone: true}"
                                                 placeholder="travel date (mm/dd/YYYY)" />
                                             <span class="input-group-addon" id="retSpan">Return</span>
-                                            <input type="text" class="input-sm form-control" id="retDate" [(ngModel)]="returns" placeholder="optional return date (mm/dd/YYYY)" />
+                                            <input type="text" class="input-sm form-control" id="retDate" [(ngModel)]="returns"
+                                                 [ngModelOptions]="{standalone: true}" placeholder="optional return date (mm/dd/YYYY)" />
                                         </div>
                                     </div>
                                 </div>

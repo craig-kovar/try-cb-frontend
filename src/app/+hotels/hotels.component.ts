@@ -1,21 +1,13 @@
 import { Component, OnInit, OnDestroy, Injectable, Inject } from '@angular/core';
-import {
-  CORE_DIRECTIVES,
-  FORM_DIRECTIVES,
-  FormBuilder,
-  ControlGroup,
-  Validators
-} from '@angular/common';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { Response } from "@angular/http";
 import { UtilityService } from "../shared/utility.service";
 import { Narration, NarrationService } from "../shared/narration.service";
-import { environment } from "../";
+import { environment } from "../environment";
 import { Observable } from 'rxjs/Rx';
 
 @Component({
-  moduleId: module.id,
   selector: 'app-hotels',
-  directives: [CORE_DIRECTIVES, FORM_DIRECTIVES],
   templateUrl: 'hotels.component.html'
 })
 
@@ -23,7 +15,7 @@ import { Observable } from 'rxjs/Rx';
 
 export class HotelsComponent implements OnInit {
 
-  hotelForm: ControlGroup;
+  hotelForm: FormGroup;
   utility: UtilityService;
   private _narrations: NarrationService;
   data;

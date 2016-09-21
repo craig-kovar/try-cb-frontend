@@ -3,30 +3,26 @@
       <h3>Find Hotels</h3>
   </div>
   <div class="panel-body">
-  <form [ngFormModel]="hotelForm"
+  <form [formGroup]="hotelForm"
         (ngSubmit)="findHotels(hotelForm.value)"
         class="form-inline"
         [class.has-error]="!hotelForm.valid">
 
-    <div class="form-group"
-      [class.has-error]="!hotelForm.find('description').valid">
+    <div class="form-group">
       <label for="descriptionInput">Description</label>
       <input type="text"
              id="descriptionInput"
              placeholder="optional keyword"
-             #desc="ngForm"
-             [ngFormControl]="hotelForm.controls['description']"
+             formControlName="description"
              class="form-control">
     </div>
 
-    <div class="form-group"
-        [class.has-error]="!hotelForm.find('location').valid">
+    <div class="form-group">
       <label for="locationInput">Location</label>
       <input type="text"
              id="locationInput"
              placeholder="eg. 'London', 'France'..."
-             #loc="ngForm"
-             [ngFormControl]="hotelForm.controls['location']"
+             formControlName="location"
              class="form-control">
     </div>
 

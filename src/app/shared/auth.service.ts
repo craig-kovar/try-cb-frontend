@@ -3,7 +3,7 @@ import { Response } from "@angular/http";
 import { IUser,IToken } from "./interfaces";
 import { UtilityService } from "./utility.service";
 import { NarrationService } from "./narration.service";
-import { environment } from "./../../app/";
+import { environment } from "../environment";
 import { md5 } from './md5';
 import { JwtHelper } from './angular2-jwt';
 import { Router } from '@angular/router'

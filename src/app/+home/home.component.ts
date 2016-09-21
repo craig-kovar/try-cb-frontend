@@ -1,15 +1,12 @@
+import {Observable} from "rxjs/Observable";
 import { Component, OnInit } from '@angular/core';
 import { Response } from "@angular/http";
-import { CORE_DIRECTIVES, FORM_DIRECTIVES } from '@angular/common';
 import { UtilityService } from '../shared';
-import { environment } from "./../../app/";
+import { environment } from "../environment";
 import { AuthService, NarrationService } from '../shared';
-import { TYPEAHEAD_DIRECTIVES } from 'ng2-bootstrap/ng2-bootstrap';
 
 @Component({
-  moduleId: module.id,
   selector: 'app-home',
-  directives: [TYPEAHEAD_DIRECTIVES, CORE_DIRECTIVES, FORM_DIRECTIVES],
   templateUrl: 'home.component.html'
 })
 
@@ -24,8 +21,6 @@ export class HomeComponent implements OnInit {
     public returns:string = null;
     public typeaheadLoading:boolean = false;
     public typeaheadNoResults:boolean = false;
-    private _cache:any;
-    private _prevContext:any;
     public outboundData: any[];
     public inboundData: any[];
     public choosen: any[];
@@ -41,45 +36,26 @@ export class HomeComponent implements OnInit {
       return this;
     }
 
-    public getToAirport(context:any):Function {
-      this._prevContext = context;
-
-      let f:Function = function ():Promise<string[]> {
-        let p:Promise<string[]> = new Promise((resolve:Function) => {
-          setTimeout(() => {
-            context.utility.makeGetRequest(environment.devHost + "/api/airports?search="+ context.to,[])
-            .then((result: Response) => {
-                let data = UtilityService.extractData(result);
+    public getToAirport(): Observable<string[]> {
+        return this.utility.makeGetRequestObs(environment.devHost + "/api/airports?search="+ this.to,[])
+        .map((result: Response) => {
+                let data = UtilityService.extractData(result) as string[];
                 let narration = UtilityService.extractNarration(result);
-                context.narrationService.addPre("N1QL typeahead for To = "  + context.to, "The following N1QL query was executed on the server:" , narration[0]);
-                return resolve(data);
+                this.narrationService.addPre("N1QL typeahead for To = "  + this.to, "The following N1QL query was executed on the server:" , narration[0]);
+                return data;
               })
-            }, 200);
-        });
-        return p;
-      };
-      this._cache = f;
-      return this._cache;
+        .timeout(200);
     }
 
-    public getFromAirport(context:any):Function {
-      this._prevContext = context;
-      let f:Function = function ():Promise<string[]> {
-        let p:Promise<string[]> = new Promise((resolve:Function) => {
-          setTimeout(() => {
-            context.utility.makeGetRequest(environment.devHost + "/api/airports?search="  + context.from, [])
-            .then((result: Response) => {
-                let data = UtilityService.extractData(result);
-                let narration = UtilityService.extractNarration(result);
-                context.narrationService.addPre("N1QL typeahead for From = "  + context.from, "The following N1QL query was executed on the server:" , narration[0]);
-                return resolve(data);
-              })
-            }, 200);
-        });
-        return p;
-      };
-      this._cache = f;
-      return this._cache;
+    public getFromAirport():Observable<string[]> {
+      return this.utility.makeGetRequestObs(environment.devHost + "/api/airports?search="+ this.from,[])
+      .map((result: Response) => {
+              let data = UtilityService.extractData(result) as string[];
+              let narration = UtilityService.extractNarration(result);
+              this.narrationService.addPre("N1QL typeahead for From = "  + this.from, "The following N1QL query was executed on the server:" , narration[0]);
+              return data;
+            })
+      .timeout(200);
     }
 
     public changeTypeaheadLoading(e:boolean):void {

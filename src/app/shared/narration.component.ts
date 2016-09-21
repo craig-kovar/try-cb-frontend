@@ -3,7 +3,6 @@ import { Narration, NarrationService } from './narration.service'
 
 @Injectable()
 @Component({
-  moduleId: module.id,
   selector: 'app-narration',
   templateUrl: 'narration.component.html',
   styleUrls: ['narration.component.css']
