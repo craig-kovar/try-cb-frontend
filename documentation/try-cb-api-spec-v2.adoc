@@ -105,19 +105,19 @@ See each corresponding query below.
 .(1)
 [source,sql]
 ----
-SELECT airportname from `travel-sample` WHERE faa = 'XXX';
+SELECT airportname from `travel-sample` WHERE faa = UPPER('XXX');
 ----
 
 .(2)
 [source,sql]
 ----
-SELECT airportname from `travel-sample` WHERE icao = 'YYYY';
+SELECT airportname from `travel-sample` WHERE icao = UPPER('YYYY');
 ----
 
 .(3)
 [source,sql]
 ----
-SELECT airportname from `travel-sample` WHERE airportname LIKE '%ZZZZZ';
+SELECT airportname from `travel-sample` WHERE LOWER(airportname) LIKE LOWER('%ZZZZZ%');
 ----
 
 ==== Return Codes and Values
