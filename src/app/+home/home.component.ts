@@ -2,7 +2,7 @@ import {Observable} from "rxjs/Observable";
 import { Component, OnInit } from '@angular/core';
 import { Response } from "@angular/http";
 import { UtilityService } from '../shared';
-import { environment } from "../environment";
+import { environment } from '../../environments/environment';
 import { AuthService, NarrationService } from '../shared';
 
 @Component({

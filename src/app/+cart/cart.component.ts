@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Response } from '@angular/http';
 import { AuthService, IUser, UtilityService, NarrationService } from '../shared';
-import { environment } from '../environment';
-
+import { environment } from '../../environments/environment';
 @Component({
   selector: 'app-cart',
   templateUrl: 'cart.component.html'
