@@ -24,7 +24,7 @@ export class UtilityService {
             requestHeaders.append("Content-Type", "application/json");
             if (authenticate) {
                 let token = this.getToken();
-                if (token) requestHeaders.append('Authentication', 'Bearer ' + token);
+                if (token) requestHeaders.append('Authorization', 'Bearer ' + token);
             }
             this.http.request(new Request({
                 method: RequestMethod.Post,
@@ -45,7 +45,7 @@ export class UtilityService {
         let headers = new Headers({ 'Content-Type': 'application/json'});
         if (authenticate) {
             let token = this.getToken();
-            if (token) headers.append('Authentication', 'Bearer ' + token);
+            if (token) headers.append('Authorization', 'Bearer ' + token);
         }
         let options = new RequestOptions({headers: headers});
 
