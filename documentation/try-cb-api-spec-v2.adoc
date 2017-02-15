@@ -410,7 +410,7 @@ Url parameters.
 |===
 
 ==== Authentication
-This operation is subject to authentication. To that end, the JWT token that was returned by the server when logging in / signing up is to be passed through the `Authentication` header, prefixed with `"Bearer "`.
+This operation is subject to authentication. To that end, the JWT token that was returned by the server when logging in / signing up is to be passed through the `Authorization` header, prefixed with `"Bearer "`.
 
 This will be used by the backend to verify the `user` claim inside the token matches the `username` in the URL.
 
@@ -488,7 +488,7 @@ Body payload (`application/json`):
 WARNING: The `flights` entries are not directly the same as what is returned during a flight search. Instead of `utc` (the route's departure time), a `date` entry should be constructed, concatenating the leg's date, a space and the `utc` field from the initial response.
 
 ==== Authentication
-This operation is subject to authentication. To that end, the JWT token that was returned by the server when logging in / signing up is to be passed through the `Authentication` header, prefixed with `"Bearer "`.
+This operation is subject to authentication. To that end, the JWT token that was returned by the server when logging in / signing up is to be passed through the `Authorization` header, prefixed with `"Bearer "`.
 
 This will be used by the backend to verify the `user` claim inside the token matches the `username` in the URL.
 
