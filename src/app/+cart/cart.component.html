@@ -22,7 +22,7 @@
                 <td>{{row.date}}</td>
                 <td>{{row.sourceairport | uppercase}}</td>
                 <td>{{row.destinationairport | uppercase}}</td>
-                <td>{{row.price}}$</td>
+                <td>${{row.price}}</td>
                 <td>
                     <button class="btn btn-xs btn-primary" type="button" (click)="book(row)">Book</button>
                     <button class="btn btn-xs btn-primary btn-danger" type="button" (click)="remove(row)" title="remove"><i class="glyphicon glyphicon-remove-circle"></i></button>

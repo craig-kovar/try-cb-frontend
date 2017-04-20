@@ -44,7 +44,7 @@ export class HomeComponent implements OnInit {
                 this.narrationService.addPre("N1QL typeahead for To = "  + this.to, "The following N1QL query was executed on the server:" , narration[0]);
                 return data;
               })
-        .timeout(200);
+        .timeout(500);
     }
 
     public getFromAirport():Observable<string[]> {
@@ -55,7 +55,7 @@ export class HomeComponent implements OnInit {
               this.narrationService.addPre("N1QL typeahead for From = "  + this.from, "The following N1QL query was executed on the server:" , narration[0]);
               return data;
             })
-      .timeout(200);
+      .timeout(500);
     }
 
     public changeTypeaheadLoading(e:boolean):void {
