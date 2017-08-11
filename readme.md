@@ -10,7 +10,7 @@ This application uses Angular 2.0 and typescript.  The developer environment req
 
 ## Versionning
 
-**This is version `2.0.0`**
+**This is version `2.0.1`**
 
 The aim is to build a distributable package that can be embedded in the various `try-cb` backend implementations.
 
@@ -25,24 +25,31 @@ The distribution's version number should be reflected in a tag and be also visib
 
  - [3] Make sure you have `angular-cli` installed (**this was build using angular-cli `1.0.0-beta.14`**):
 
-> `npm install -g angular-cli`
+```
+npm install -g angular-cli@1.0.0-beta.14
+```
 
  - [3] Install node dependencies, build and serve using angular-cli:
 
-> `npm install`
-> `ng serve`
-
+```
+npm install
+ng serve
+```
 
 To build a distributable version that can be embedded in a try-cb backend implementation, you can also use production mode:
 
-> `rm -rf dist/*`
-> `ng build --prod`
-> Then copy the content of `dist/` over...
+```
+rm -rf dist/*
+ng build --prod
+```
 
-**If you have globally installed an older angular-cli**:
+Then copy the content of `dist/` over to the backend application.
 
-> `npm uninstall -g angular-cli`
-> `npm cache clean`
-> `npm install -g angular-cli@latest`
+**If you have globally installed an different angular-cli**:
 
-Note the `latest` will likely evolve into something different, so you might have to force it to `1.0.0-beta14` instead if it still doesn't work...
+```
+npm uninstall -g angular-cli
+npm install -g angular-cli@1.0.0-beta.14
+```
+
+Note the `latest` version of anglular-cli doesn't work with the version that was used to build this example (1.0.0-beta14).
