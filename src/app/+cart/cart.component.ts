@@ -45,7 +45,7 @@ export class CartComponent implements OnInit {
         "flights": [ flight ]
       };
       let user:string = this.utility.getUser();
-      let url:string = environment.devHost + "/api/user/" + user + "/flights";
+      let url:string = "/api/user/" + user + "/flights";
       this.narrationService.addPre("Authenticated POST to " + url, "The payload was:", JSON.stringify(flights));
 
       return this.utility.makePostRequest(url, [], flights, true).then((response: Response) => {

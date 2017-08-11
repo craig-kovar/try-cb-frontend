@@ -36,7 +36,7 @@ export class HotelsComponent implements OnInit {
       var location = value.location;
       var description = value.description;
 
-      var url = environment.devHost + "/api/hotel/";
+      var url = "/api/hotel/";
       var hasDescription = (description != null && description != "");
       var hasLocation = (location != null && location != "");
       if (hasDescription && hasLocation) {

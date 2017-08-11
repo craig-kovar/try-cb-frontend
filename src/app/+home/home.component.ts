@@ -37,7 +37,7 @@ export class HomeComponent implements OnInit {
     }
 
     public getToAirport(): Observable<string[]> {
-        return this.utility.makeGetRequestObs(environment.devHost + "/api/airports?search="+ this.to,[])
+        return this.utility.makeGetRequestObs("/api/airports?search="+ this.to,[])
         .map((result: Response) => {
                 let data = UtilityService.extractData(result) as string[];
                 let narration = UtilityService.extractNarration(result);
@@ -48,7 +48,7 @@ export class HomeComponent implements OnInit {
     }
 
     public getFromAirport():Observable<string[]> {
-      return this.utility.makeGetRequestObs(environment.devHost + "/api/airports?search="+ this.from,[])
+      return this.utility.makeGetRequestObs("/api/airports?search="+ this.from,[])
       .map((result: Response) => {
               let data = UtilityService.extractData(result) as string[];
               let narration = UtilityService.extractNarration(result);
@@ -71,11 +71,11 @@ export class HomeComponent implements OnInit {
     }
 
     public findFlights(from:string, to:string, leaves:string, returns:string):void {
-        let narrationUrl = environment.devHost + "/api/flightPaths/" + from + "/" + to + "?leave=" + leaves;
+        let narrationUrl = "/api/flightPaths/" + from + "/" + to + "?leave=" + leaves;
         this.narrationService.addSeparator("HOME: Find Flight");
         this.narrationService.add("Outbound leg GET to " + narrationUrl, "");
 
-        this.utility.makeGetRequestObs(environment.devHost + "/api/flightPaths",[from, to],"leave="+leaves)
+        this.utility.makeGetRequestObs("/api/flightPaths",[from, to],"leave="+leaves)
             .map((response: Response) => response.json())
             .subscribe(
                 (val: any) => {
@@ -96,10 +96,10 @@ export class HomeComponent implements OnInit {
             );
 
         if (returns) {
-            let narrationUrl = environment.devHost + "/api/flightPaths/" + to + "/" + from + "?leave=" + returns;
+            let narrationUrl = "/api/flightPaths/" + to + "/" + from + "?leave=" + returns;
             this.narrationService.add("Return leg GET to " + narrationUrl, "");
 
-            this.utility.makeGetRequestObs(environment.devHost + "/api/flightPaths",[to, from],"leave=" + returns)
+            this.utility.makeGetRequestObs("/api/flightPaths",[to, from],"leave=" + returns)
                 .map((response: Response) => response.json())
                 .subscribe(
                     (val: any) => {

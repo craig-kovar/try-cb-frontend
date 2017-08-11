@@ -23,7 +23,7 @@ export class UserComponent implements OnInit {
   ngOnInit() {
       this.user = this.utility.getUser();
 
-      this.utility.makeGetRequestObs(environment.devHost + "/api/user", [this.user, "flights"], null, true)
+      this.utility.makeGetRequestObs("/api/user", [this.user, "flights"], null, true)
         .map((response: Response) => response.json())
         .subscribe(
         (val) => {

@@ -32,7 +32,7 @@ export class AuthService {
 
 login(email: string, password: string) {
   return new Promise((resolve, reject) => {
-    this.utility.makePostRequest(environment.devHost + "/api/user/login", [], {"user": email, "password": md5(password)}).then((res: Response) => {
+    this.utility.makePostRequest("/api/user/login", [], {"user": email, "password": md5(password)}).then((res: Response) => {
       let result = UtilityService.extractData(res);
       if (result.token && environment.jwtEnabled) {
             try {
@@ -61,7 +61,7 @@ login(email: string, password: string) {
 register(email: string, password:string) {
   let cUser: IUser = { user: email, password: md5(password) };
   return new Promise((resolve, reject) => {
-    this.utility.makePostRequest(environment.devHost + "/api/user/signup", [], cUser).then((res: Response) => {
+    this.utility.makePostRequest("/api/user/signup", [], cUser).then((res: Response) => {
       let result = UtilityService.extractData(res);
       let narration = UtilityService.extractNarration(res);
       this.narrationService.addPre("Account Created", "The account for " + email + " was created on the server", narration[0]);
