@@ -8,7 +8,7 @@ Travel-Sample Application for CB 4.5 including support for new features :
 
 This application uses Angular 2.0 and typescript.  The developer environment requires Angular-CLI to build.
 
-## Versionning
+## Versioning
 
 **This is version `2.0.1`**
 
@@ -23,7 +23,7 @@ The distribution's version number should be reflected in a tag and be also visib
 
  - [2] Clone this repo.
 
- - [3] Make sure you have `angular-cli` installed (**this was build using angular-cli `1.0.0-beta.14`**):
+ - [3] Make sure you have `angular-cli` installed (**this was built using angular-cli `1.0.0-beta.14`**):
 
 ```
 npm install -g angular-cli@1.0.0-beta.14
