@@ -14,7 +14,7 @@ export class UtilityService {
     }
 
     makePostRequest(url: string, params: Array<string>, body: Object, authenticate: boolean=false) {
-        var fullUrl: string = url;
+        var fullUrl: string = window.location.protocol + "//" + window.location.host + url;
         if(params && params.length > 0) {
             fullUrl = fullUrl + "/" + params.join("/");
         }
