@@ -1,3 +1,6 @@
+Forked from couchbaselabs/try-cb-frontend to update the supported Angular platforms. Original repositor was limited to 
+Angular-cli@1.0.0-beta.14.  Now runs with @angular/cli@>8
+
 Angular 2 Front End for CB Reference Application
 ===============
 
